@@ -9,17 +9,17 @@ const app = new Koa();
 const Router = require('koa-router');
 const router = new Router();
 
+app.keys = [config.secret];
+
+const handlers = fs.readdirSync(path.join(__dirname, 'handlers')).sort();
+handlers.forEach(handler => require('./handlers/' + handler).init(app));
+
 const User = require('./mongoose/User');
 const addNewUser = require('./routeHandlers/addNewUser.js');
 const deleteUser = require('./routeHandlers/deleteUser.js');
 const getAllUsers = require('./routeHandlers/getAllUsers.js');
 const getUser = require('./routeHandlers/getUser.js');
 const updateUser = require('./routeHandlers/updateUser.js');
-
-app.keys = [config.secret];
-
-const handlers = fs.readdirSync(path.join(__dirname, 'handlers')).sort();
-handlers.forEach(handler => require('./handlers/' + handler).init(app));
 
 router.get('/users', getAllUsers);
 

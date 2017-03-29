@@ -7,7 +7,21 @@ const addNewUser = async(ctx, next) => {
     ctx.body = `${name}/${user._id}`;
   } catch(e) {
     if (e.code === 11000) {
-      ctx.throw(409, 'Sorry, user exists');
+      const response = {};
+      if (e.errmsg.indexOf(email) > 0) response[email] = 'Данный email существует';
+      if (e.errmsg.indexOf(name) > 0) response[name] = 'Данный name существует';
+      ctx.throw(409, JSON.stringify({
+        errors: response
+      }));
+    } else {
+      const arrayOfErrors = Object.keys(e.errors);
+      const response = {};
+      arrayOfErrors.forEach(error => {
+        response[error] = e.errors[error].message;
+      });
+      ctx.throw(400, JSON.stringify({
+        errors: response
+      }));
     }
   }
 };

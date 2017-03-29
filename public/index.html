@@ -8,31 +8,31 @@
   <p class="lead">Добро пожаловать в ад!</p>
 
   <form id="createNewUser" class="form-inline">
-    <input type="text" name="newName" placeholder="name" required/>
-    <input type="email" name="newEmail" placeholder="email" required/>
+    <input type="text" name="newName" placeholder="name"/>
+    <input type="email" name="newEmail" placeholder="email"/>
     <input type="submit" name="button" class="create-new-user btn btn-primary" value="Создать"/>
   </form>
 
   <br />
 
   <form id="updateUser" class="form-inline">
-    <input type="text" name="userId" placeholder="userId" required/>
-    <input type="text" name="name" placeholder="name" required/>
-    <input type="email" name="email" placeholder="email" required/>
+    <input type="text" name="userId" placeholder="userId"/>
+    <input type="text" name="name" placeholder="name"/>
+    <input type="email" name="email" placeholder="email"/>
     <input type="submit" name="button" class="btn btn-primary" value="Обновить"/>
   </form>
 
   <br />
 
   <form id="getUser" class="form-inline">
-    <input type="text" name="userId" placeholder="user id" required/>
+    <input type="text" name="userId" placeholder="user id"/>
     <input type="submit" name="submit" class="show-user btn btn-primary" value="Показать"/>
   </form>
 
   <br />
 
   <form id="deleteUser" class="form-inline">
-    <input type="text" name="userId" placeholder="user id" required/>
+    <input type="text" name="userId" placeholder="user id"/>
     <input type="submit" name="button" class="btn btn-primary" value="Удалить"/>
   </form>
 
@@ -59,11 +59,29 @@
       xhr.open("POST", "/users", true);
 
       xhr.onload = function() {
-        const p = document.createElement('p');
-        p.textContent = this.responseText;
-        info.appendChild(p);
-
-        createNewUser.disabled = false;
+        if (this.status === 200) {
+          const p = document.createElement('p');
+          p.textContent = `${this.responseText} was created`;
+          info.appendChild(p);
+        } else if (this.status === 400) {
+          const ul = document.createElement('ul');
+          const response = JSON.parse(this.responseText);
+          Object.keys(response.errors).forEach(error => {
+            const li = document.createElement('li');
+            li.textContent = response.errors[error];
+            ul.appendChild(li);
+          });
+          info.appendChild(ul);
+        } else if (this.status === 409) {
+          const ul = document.createElement('ul');
+          const response = JSON.parse(this.responseText);
+          Object.keys(response.errors).forEach(error => {
+            const li = document.createElement('li');
+            li.textContent = response.errors[error];
+            ul.appendChild(li);
+          });
+          info.appendChild(ul);
+        }
       };
 
       xhr.onerror = xhr.onabort = function() {

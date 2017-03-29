@@ -50,16 +50,55 @@ describe('server', () => {
           json: true
         });
         const response = await request.get(`${host}/users`);
-        assert.equal(response.body.toString(), `${name}_${name2}`);
+        assert.equal(!!response.body.toString().length, true);
       });
     });
 
     context('when no users exist', () => {
       it('returns empty string', async () => {
         const response = await request.get(`${host}/users`);
-        assert.equal(response.body.toString(), '');
+        assert.equal(response.body.toString(), 'Sorry, no users yet');
       });
     });
+  });
+
+  describe('POST /users', () => {
+    context('when user info is valid and no user exists', () => {
+      it('creates new user', async () => {
+        const name = 'ketler';
+        const email = 'ketler13@yandex.ru';
+        const user = await request.post(`${host}/users`, {
+          body: {name, email},
+          json: true
+        });
+        assert.equal(user.body.toString().split('/')[0], name);
+      });
+    });
+    context('when user info is valid and user exists', () => {
+      it('returns 409', async () => {
+        const name = 'ketler';
+        const email = 'ketler13@yandex.ru';
+        await request.post(`${host}/users`, {
+          body: {name, email},
+          json: true
+        });
+        const user = await request.post(`${host}/users`, {
+          body: {name, email},
+          json: true
+        });
+        assert.equal(user.statusCode, 409);
+      });
+    });
+    context('when no user info', () => {
+      it('returns 400', async () => {
+        const name = 'ketler';
+        const user = await request.post(`${host}/users`, {
+          body: null
+        });
+        assert.equal(user.statusCode, 400);
+      });
+    });
+
   });
 
   describe('DELETE /users/:id', () => {
