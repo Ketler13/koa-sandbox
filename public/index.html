@@ -63,7 +63,7 @@
           const p = document.createElement('p');
           p.textContent = `${this.responseText} was created`;
           info.appendChild(p);
-        } else if (this.status === 400) {
+        } else if (this.status === 400 || this.status === 409) {
           const ul = document.createElement('ul');
           const response = JSON.parse(this.responseText);
           Object.keys(response.errors).forEach(error => {
@@ -72,16 +72,7 @@
             ul.appendChild(li);
           });
           info.appendChild(ul);
-        } else if (this.status === 409) {
-          const ul = document.createElement('ul');
-          const response = JSON.parse(this.responseText);
-          Object.keys(response.errors).forEach(error => {
-            const li = document.createElement('li');
-            li.textContent = response.errors[error];
-            ul.appendChild(li);
-          });
-          info.appendChild(ul);
-        }
+        } 
       };
 
       xhr.onerror = xhr.onabort = function() {

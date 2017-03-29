@@ -91,18 +91,25 @@ describe('server', () => {
     });
     context('when no user info', () => {
       it('returns 400', async () => {
-        const name = 'ketler';
         const user = await request.post(`${host}/users`, {
           body: null
         });
         assert.equal(user.statusCode, 400);
       });
     });
-
+    context('when user info is not completed', () => {
+      it('returns 400', async () => {
+        const user = await request.post(`${host}/users`, {
+          body: {name: 'ketler'},
+          json: true
+        });
+        assert.equal(user.statusCode, 400);
+      });
+    });
   });
 
   describe('DELETE /users/:id', () => {
-    context('when user exists', () => {
+    context('id is valid and user exists', () => {
       it('deletes user and returns response', async () => {
         const name = 'ketler';
         const email = 'ketler13@yandex.ru';
@@ -116,6 +123,33 @@ describe('server', () => {
           uri: `${host}/users/:${id}`
         });
         assert.equal(response.body.toString(),'User was deleted');
+      });
+    });
+    context('when id is valid and no user exists', () => {
+      it('returns 404', async () => {
+        const response = await request({
+          method: 'DELETE',
+          uri: `${host}/users/:58dc0243f4e63215707a6920`
+        });
+        assert.equal(response.statusCode, 404);
+      });
+    });
+    context('when id is invalid', () => {
+      it('returns 400', async () => {
+        const response = await request({
+          method: 'DELETE',
+          uri: `${host}/users/:123`
+        });
+        assert.equal(response.statusCode, 400);
+      });
+    });
+    context('when no id', () => {
+      it('returns 400', async () => {
+        const response = await request({
+          method: 'DELETE',
+          uri: `${host}/users/:`
+        });
+        assert.equal(response.statusCode, 400);
       });
     });
   });

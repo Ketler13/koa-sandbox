@@ -9,7 +9,7 @@ const addNewUser = async(ctx, next) => {
     if (e.code === 11000) {
       const response = {};
       if (e.errmsg.indexOf(email) > 0) response[email] = 'Данный email существует';
-      if (e.errmsg.indexOf(name) > 0) response[name] = 'Данный name существует';
+      else response[name] = 'Данный name существует';
       ctx.throw(409, JSON.stringify({
         errors: response
       }));
