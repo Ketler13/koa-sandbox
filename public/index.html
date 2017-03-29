@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.4/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="container">
+  <p class="lead">Добро пожаловать в ад!</p>
+
+  <form id="createNewUser" class="form-inline">
+    <input type="text" name="newName" placeholder="name" required/>
+    <input type="email" name="newEmail" placeholder="email" required/>
+    <input type="submit" name="button" class="create-new-user btn btn-primary" value="Создать"/>
+  </form>
+
+  <br />
+
+  <form id="updateUser" class="form-inline">
+    <input type="text" name="userId" placeholder="userId" required/>
+    <input type="text" name="name" placeholder="name" required/>
+    <input type="email" name="email" placeholder="email" required/>
+    <input type="submit" name="button" class="btn btn-primary" value="Обновить"/>
+  </form>
+
+  <br />
+
+  <form id="getUser" class="form-inline">
+    <input type="text" name="userId" placeholder="user id" required/>
+    <input type="submit" name="submit" class="show-user btn btn-primary" value="Показать"/>
+  </form>
+
+  <br />
+
+  <form id="deleteUser" class="form-inline">
+    <input type="text" name="userId" placeholder="user id" required/>
+    <input type="submit" name="button" class="btn btn-primary" value="Удалить"/>
+  </form>
+
+  <br />
+
+  <input type="button" id="showAll" class="btn btn-primary" value="Показать всех"/>
+
+  <br />
+  <br />
+
+  <div id="info"></div>
+
+  <script>
+    createNewUser.onsubmit = createUser;
+    updateUser.onsubmit = update;
+    getUser.onsubmit = showUser;
+    deleteUser.onsubmit = removeUser;
+    showAll.onclick = showAllUsers;
+
+    function createUser() {
+
+      const xhr = new XMLHttpRequest();
+
+      xhr.open("POST", "/users", true);
+
+      xhr.onload = function() {
+        const p = document.createElement('p');
+        p.textContent = this.responseText;
+        info.appendChild(p);
+
+        createNewUser.disabled = false;
+      };
+
+      xhr.onerror = xhr.onabort = function() {
+        const p = document.createElement('p');
+        p.textContent = this.responseText;
+        info.appendChild(p);
+
+        createNewUser.disabled = false;
+      };
+
+      xhr.setRequestHeader('Content-Type', 'application/json;charset=utf-8');
+      xhr.send(JSON.stringify({
+        name: this.elements.newName.value,
+        email: this.elements.newEmail.value
+      }));
+
+      createNewUser.disabled = true;
+
+      this.elements.newName.value = '';
+      this.elements.newEmail.value = '';
+
+      return false;
+    };
+
+    function update() {
+      const id = this.elements.userId.value;
+      const xhr = new XMLHttpRequest();
+
+      xhr.open("PATCH", `/users/:${id}`, true);
+
+      xhr.onload = function() {
+        const p = document.createElement('p');
+        p.textContent = this.responseText;
+        info.appendChild(p);
+      };
+
+      xhr.onerror = xhr.onabort = function() {
+        const p = document.createElement('p');
+        p.textContent = this.responseText;
+        info.appendChild(p);
+      };
+
+      xhr.setRequestHeader('Content-Type', 'application/json;charset=utf-8');
+      xhr.send(JSON.stringify({
+        name: this.elements.name.value,
+        email: this.elements.email.value
+      }));
+
+      this.elements.userId.value = '';
+      this.elements.name.value = '';
+      this.elements.email.value = '';
+
+      return false;
+    }
+
+    function showUser() {
+      const id = this.elements.userId.value;
+
+      const xhr = new XMLHttpRequest();
+
+      xhr.open("GET", `/users/:${id}`, true);
+
+      xhr.onload = function() {
+        if(xhr.status != 200) return this.onerror();
+
+        const p = document.createElement('p');
+        p.textContent = this.responseText;
+        info.appendChild(p);
+        getUser.disable = false;
+      };
+
+      xhr.onerror = xhr.onabort = function() {
+        const p = document.createElement('p');
+        p.textContent = this.responseText;
+        info.appendChild(p);
+        getUser.disable = false;
+      };
+
+      xhr.send();
+      getUser.disable = true;
+
+      this.elements.userId.value = '';
+
+      return false;
+    };
+
+    function removeUser() {
+      const id = this.elements.userId.value;
+
+      const xhr = new XMLHttpRequest();
+
+      xhr.open("DELETE", `/users/:${id}`, true);
+
+      xhr.onload = function() {
+        if(xhr.status != 200) return this.onerror();
+
+        const p = document.createElement('p');
+        p.textContent = this.responseText;
+        info.appendChild(p);
+        getUser.disable = false;
+      };
+
+      xhr.onerror = xhr.onabort = function() {
+        const p = document.createElement('p');
+        p.textContent = this.responseText;
+        info.appendChild(p);
+        getUser.disable = false;
+      };
+
+      xhr.send();
+      getUser.disable = true;
+
+      this.elements.userId.value = '';
+
+      return false;
+    };
+
+    function showAllUsers() {
+      const xhr = new XMLHttpRequest();
+
+      xhr.open("GET", "/users", true);
+
+      xhr.onload = function() {
+        if(xhr.status != 200) return this.onerror();
+
+        const ul = document.createElement('ul');
+        const userArray = this.responseText.split('_');
+
+        userArray.forEach(user => {
+          const li = document.createElement('li');
+          li.textContent = user;
+          ul.appendChild(li);
+        })
+        info.appendChild(ul);
+        showAll.disabled = false;
+      };
+
+      xhr.onerror = xhr.onabort = function() {
+        p.textContent = "error";
+        showAll.disabled = false;
+      };
+
+      xhr.send();
+      showAll.disabled = true;
+
+      return false;
+    };
+
+  </script>
+</body>
+</html>
