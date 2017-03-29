@@ -15,11 +15,18 @@
 
   <br />
 
-  <form id="updateUser" class="form-inline">
+  <form id="updateUserName" class="form-inline">
     <input type="text" name="userId" placeholder="userId"/>
-    <input type="text" name="name" placeholder="name"/>
-    <input type="email" name="email" placeholder="email"/>
-    <input type="submit" name="button" class="btn btn-primary" value="Обновить"/>
+    <input type="text" name="field" placeholder="name"/>
+    <input type="submit" name="button" class="btn btn-primary" value="Обновить name"/>
+  </form>
+
+  <br />
+
+  <form id="updateUserEmail" class="form-inline">
+    <input type="text" name="userId" placeholder="userId"/>
+    <input type="email" name="field" placeholder="email"/>
+    <input type="submit" name="button" class="btn btn-primary" value="Обновить email"/>
   </form>
 
   <br />
@@ -47,7 +54,8 @@
 
   <script>
     createNewUser.onsubmit = createUser;
-    updateUser.onsubmit = update;
+    updateUserName.onsubmit = update;
+    updateUserEmail.onsubmit = update;
     getUser.onsubmit = showUser;
     deleteUser.onsubmit = removeUser;
     showAll.onclick = showAllUsers;
@@ -72,7 +80,7 @@
             ul.appendChild(li);
           });
           info.appendChild(ul);
-        } 
+        }
       };
 
       xhr.onerror = xhr.onabort = function() {
@@ -100,6 +108,7 @@
     function update() {
       const id = this.elements.userId.value;
       const xhr = new XMLHttpRequest();
+      const type = (this.elements.field.type === 'text') ? 'name' : 'email';
 
       xhr.open("PATCH", `/users/:${id}`, true);
 
@@ -117,13 +126,12 @@
 
       xhr.setRequestHeader('Content-Type', 'application/json;charset=utf-8');
       xhr.send(JSON.stringify({
-        name: this.elements.name.value,
-        email: this.elements.email.value
+        field: this.elements.field.value,
+        type
       }));
 
       this.elements.userId.value = '';
-      this.elements.name.value = '';
-      this.elements.email.value = '';
+      this.elements.field.value = '';
 
       return false;
     }

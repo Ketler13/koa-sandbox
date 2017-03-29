@@ -9,6 +9,8 @@ const host = 'http://127.0.0.1:3000';
 
 const User = require('../mongoose/User');
 
+const {createUser, updateUser} = require('./helpers');
+
 describe('server', () => {
   beforeEach(async () => await User.remove({}));
 
@@ -17,10 +19,7 @@ describe('server', () => {
       it('returns created user', async () => {
         const name = 'ketler';
         const email = 'ketler13@yandex.ru';
-        const user = await request.post(`${host}/users`, {
-          body: {name, email},
-          json: true
-        });
+        const user = await createUser(name, email);
         const id = user.body.toString().split('/')[1];
         const response = await request.get(`${host}/users/:${id}`);
         assert.equal(response.body.toString(), `${name}/${email}`);
@@ -41,14 +40,8 @@ describe('server', () => {
         const email = 'ketler13@yandex.ru';
         const name2 = 'ketler2';
         const email2 = 'ketler14@yandex.ru';
-        await request.post(`${host}/users`, {
-          body: {name, email},
-          json: true
-        });
-        await request.post(`${host}/users`, {
-          body: {name: name2, email: email2},
-          json: true
-        });
+        await createUser(name, email);
+        await createUser(name2, email2);
         const response = await request.get(`${host}/users`);
         assert.equal(!!response.body.toString().length, true);
       });
@@ -67,10 +60,7 @@ describe('server', () => {
       it('creates new user', async () => {
         const name = 'ketler';
         const email = 'ketler13@yandex.ru';
-        const user = await request.post(`${host}/users`, {
-          body: {name, email},
-          json: true
-        });
+        const user = await createUser(name, email);
         assert.equal(user.body.toString().split('/')[0], name);
       });
     });
@@ -78,14 +68,8 @@ describe('server', () => {
       it('returns 409', async () => {
         const name = 'ketler';
         const email = 'ketler13@yandex.ru';
-        await request.post(`${host}/users`, {
-          body: {name, email},
-          json: true
-        });
-        const user = await request.post(`${host}/users`, {
-          body: {name, email},
-          json: true
-        });
+        await createUser(name, email);
+        const user = await createUser(name, email);
         assert.equal(user.statusCode, 409);
       });
     });
@@ -104,6 +88,35 @@ describe('server', () => {
           json: true
         });
         assert.equal(user.statusCode, 400);
+      });
+    });
+  });
+
+  describe('PATCH users/:id', () => {
+    context('when field is valid', () => {
+      it('changes field', async () => {
+        const name = 'ketler';
+        const email = 'ketler13@yandex.ru';
+        const newName = 'lika';
+        const user = await createUser(name, email);
+        const id = user.body.toString().split('/')[1];
+        const updatedUser = await updateUser(id, newName, 'name');
+        const response = updatedUser.body.toString();
+        const fieldIsChanged = response.indexOf(newName) > 0;
+        assert.equal(fieldIsChanged, true);
+      });
+    });
+    context('when field is empty', () => {
+      it('returns 400 and field not changed', async () => {
+        const name = 'ketler';
+        const email = 'ketler13@yandex.ru';
+        const user = await createUser(name, email);
+        const id = user.body.toString().split('/')[1];
+        const updatedUser = await updateUser(id, null, 'name');
+        const checkUser = await User.findOne({_id: id});
+        const statusIsCorrect = (updatedUser.statusCode === 400);
+        const nameNotChanged = (checkUser.name === name);
+        assert.equal((statusIsCorrect && nameNotChanged), true);
       });
     });
   });

@@ -2,12 +2,13 @@ const User = require('../mongoose/User');
 
 const updateUser = async (ctx, next) => {
   const id = ctx.params.id.substring(1);
-  const {name, email} = ctx.request.body;
+  const {field, type} = ctx.request.body;
+  const opts = {runValidators: true};
   try {
-    const update = await User.update({_id: id}, {$set: {name, email}});
-    ctx.body = `I can patch user with id ${id}`;
+    const update = await User.update({_id: id}, {$set: {[type]: field}}, opts);
+    ctx.body = `User with ${id} was changed to ${field}`;
   } catch(e) {
-    ctx.body = e.toString();
+    ctx.throw(400, e.errors[type].message);
   }
 };
 
